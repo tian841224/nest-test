@@ -37,7 +37,7 @@ export class CatService {
       throw new NotFoundException('Cat not found');
     }
     this.catRepository.update(id, dto);
-    return cat;
+    return await this.findOne(id);
   }
 
   async delete(id: number): Promise<void> {
