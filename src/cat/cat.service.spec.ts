@@ -64,21 +64,18 @@ describe('CatService', () => {
     expect(createdResult).toEqual(createdCat);
 
     // 模擬查找貓的行為
-    mockRepository.findOne.mockResolvedValue(createdCat);
+    mockRepository.findOne.mockResolvedValue(createdCat); 
 
     // 模擬更新貓的行為
     const updatedCat = { id: 1, name: 'Amber', age: 3, breed: 'None' };
-    mockRepository.save.mockResolvedValue(updatedCat);
+    mockRepository.update.mockResolvedValue(undefined); // 模擬更新操作，返回 void
 
-    // 模擬更新後返回的貓
-    mockRepository.findOne.mockResolvedValue(updatedCat);
-
-    // 模擬更新操作
-    mockRepository.update.mockResolvedValue(undefined);
+    // 模擬更新後查找貓的行為
+    mockRepository.findOne.mockResolvedValue(updatedCat); // 確保返回更新後的貓
 
     // 執行更新操作
     const updatedResult = await service.update(1, updatedCat);
-    expect(updatedResult).toEqual(updatedCat);
+    expect(updatedResult).toEqual(updatedCat); // 確認返回的結果是更新後的貓
 
     // 驗證方法調用
     expect(mockRepository.create).toHaveBeenCalledWith({
@@ -86,14 +83,9 @@ describe('CatService', () => {
       age: 2,
       breed: 'Siamese',
     });
-    expect(mockRepository.save).toHaveBeenCalledTimes(2);
+    expect(mockRepository.save).toHaveBeenCalledTimes(1); // 只應該被調用一次
     expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
-    expect(mockRepository.save).toHaveBeenLastCalledWith({
-      id: 1,
-      name: 'Amber',
-      age: 3,
-      breed: 'None',
-    });
+    expect(mockRepository.update).toHaveBeenCalledWith(1, updatedCat); // 驗證 update 方法的調用
   });
 
   it('更新Cat-資料不存在狀況', async () => {
@@ -134,6 +126,7 @@ describe('CatService', () => {
     mockRepository.findOne.mockResolvedValueOnce(null);
 
     // 嘗試獲取已刪除的貓，並期望拋出 NotFoundException
+    // 這裡需要確保 service.findOne 正確調用 mockRepository.findOne
     await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
   });
 });

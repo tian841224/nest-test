@@ -22,6 +22,9 @@ export class CatService {
     let cat = await this.catRepository.findOne({ where: { id } });
     this.logger.log(`Searching for cat with ID: ${id}`);
     this.logger.log(`Current cats: ${JSON.stringify(cat)}`);
+    if (!cat) {
+      throw new NotFoundException('Cat not found');
+    }
     return cat;
   }
 
@@ -36,7 +39,7 @@ export class CatService {
     if (!cat) {
       throw new NotFoundException('Cat not found');
     }
-    this.catRepository.update(id, dto);
+    await this.catRepository.update(id, dto);
     return await this.findOne(id);
   }
 
