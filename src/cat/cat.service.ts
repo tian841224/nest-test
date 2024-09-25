@@ -1,53 +1,53 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { CatCreateDto } from 'src/dtos/cat/cat.create.dto';
-import { CatEntity } from '../entities/cat.entity';
-import { CatUpdateDto } from 'src/dtos/cat/cat.update.dto';
+import { CatCreateDto } from './dtos/cat.create.dto';
+import { CatUpdateDto } from './dtos/cat.update.dto';
+import { Cat } from './entities/cat.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class CatService {
   private readonly logger = new Logger(CatService.name);
-  private cats: CatEntity[] = [];
 
-  findAll(): CatEntity[] {
-    return this.cats;
+  constructor(
+    @InjectRepository(Cat)
+    private catRepository: Repository<Cat>,
+  ) {}
+
+  async findAll(): Promise<Cat[]> {
+    return await this.catRepository.find();
   }
 
-  findOne(id: number): CatEntity {
+  async findOne(id: number): Promise<Cat> {
+    let cat = await this.catRepository.findOne({ where: { id } });
     this.logger.log(`Searching for cat with ID: ${id}`);
-    this.logger.log(`Current cats: ${JSON.stringify(this.cats)}`);
-    return this.cats.find((cat) => cat.id == id);
-  }
-
-  create(dto: CatCreateDto): CatEntity {
-    let maxId: number = 0;
-
-    //判斷cat是否有資料
-    if (this.cats.length !== 0) {
-      //取出最大ID
-      maxId = Math.max(...this.cats.map((cat) => cat.id));
-    }
-
-    let cat = new CatEntity(maxId + 1, dto.name, dto.age, dto.breed);
-    this.cats.push(cat);
-    return cat;
-  }
-
-    update(id: number, dto: CatUpdateDto): CatEntity {
-    const cat = this.findOne(id);
+    this.logger.log(`Current cats: ${JSON.stringify(cat)}`);
     if (!cat) {
       throw new NotFoundException('Cat not found');
     }
-    cat.name = dto.name;
-    cat.age = dto.age;
-    cat.breed = dto.breed;
     return cat;
   }
 
-  delete(id: number): void {
-    const cat = this.findOne(id);
+  async create(dto: CatCreateDto): Promise<Cat> {
+    let cat = this.catRepository.create(dto);
+    await this.catRepository.save(cat); 
+    return cat;
+  }
+
+  async update(id: number, dto: CatUpdateDto): Promise<Cat> {
+    const cat = await this.findOne(id);
     if (!cat) {
       throw new NotFoundException('Cat not found');
     }
-    this.cats = this.cats.filter((cat) => cat.id !== id);
+    await this.catRepository.update(id, dto);
+    return await this.findOne(id);
+  }
+
+  async delete(id: number): Promise<void> {
+    const cat = await this.findOne(id);
+    if (!cat) {
+      throw new NotFoundException('Cat not found');
+    }
+    await this.catRepository.delete(id);
   }
 }
