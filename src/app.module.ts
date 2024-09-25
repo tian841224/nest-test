@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { CatModule } from './cat/cat.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { redisProvider } from './modules/redis.provider';
 
 @Module({
   imports: [
@@ -24,7 +25,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
   ],
+
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, redisProvider],
+  exports: [redisProvider],
 })
 export class AppModule {}
