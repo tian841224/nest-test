@@ -30,6 +30,11 @@ describe('CatService', () => {
 
     service = module.get<CatService>(CatService);
     repository = module.get<Repository<Cat>>(getRepositoryToken(Cat));
+    jest.clearAllMocks(); // 清除所有 mock
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks(); // 重置所有 mock
   });
 
   it('should be defined', () => {
