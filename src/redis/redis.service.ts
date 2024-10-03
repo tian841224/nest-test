@@ -4,7 +4,7 @@ import Redis from 'ioredis';
 
 export const REDIS_CLIENT = 'REDIS_CLIENT';
 
-export const redisProvider: Provider = {
+export const RedisProvider: Provider = {
   provide: REDIS_CLIENT,
   useFactory: (configService: ConfigService) => {
     return new Redis({
