@@ -1,9 +1,12 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CatCreateDto } from './dtos/cat.create.dto';
 import { CatUpdateDto } from './dtos/cat.update.dto';
 import { Cat } from './entities/cat.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+// import { REDIS_CLIENT } from 'src/redis/redis.module';
+// import Redis from 'ioredis';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class CatService {
@@ -12,6 +15,9 @@ export class CatService {
   constructor(
     @InjectRepository(Cat)
     private catRepository: Repository<Cat>,
+    // @Inject(REDIS_CLIENT) 
+    // private readonly redis: Redis  
+    private readonly redis: RedisService  
   ) {}
 
   async findAll(): Promise<Cat[]> {
@@ -31,6 +37,7 @@ export class CatService {
   async create(dto: CatCreateDto): Promise<Cat> {
     let cat = this.catRepository.create(dto);
     await this.catRepository.save(cat); 
+    await this.redis.set(`cat:${cat.id}`, JSON.stringify(cat));
     return cat;
   }
 
