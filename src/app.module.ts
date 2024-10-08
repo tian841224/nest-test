@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { CatModule } from './cat/cat.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './modules/database.module';
-import { RedisModule } from './redis/redis.module';
+import { RedisCacheModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { RedisModule } from './redis/redis.module';
     }),
     CatModule,
     DatabaseModule,
-    RedisModule,
+    RedisCacheModule,
   ],
 
   controllers: [AppController],
